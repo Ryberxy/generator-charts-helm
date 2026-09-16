@@ -1,0 +1,56 @@
+spec:
+  name: adaptador-eventos-pruebas-analiticas
+  version: "1.0.0"
+  image:
+    pullPolicy: IfNotPresent
+    name: adaptador-eventos-pruebas-analiticas
+  replicaCount: 1
+  usage_level: low
+  autoscaling:
+    enabled: false
+  service:
+    sas_monitoring: false
+  container:
+    port: 9091
+  authentication:
+    enabled: false
+  trafficManagement:
+    ruleSet:
+    - name: route-to-health
+      prefix: /adaptadorsenalesmpa/health
+      urlRewrite: /health
+    - name: route-to-openapi-ui
+      prefix: /adaptadorsenalesmpa/openapi/ui
+      urlRewrite: /openapi/ui
+    - name: route-to-jwt
+      prefix: /adaptadorsenalesmpa/jwt
+      urlRewrite: /jwt
+    - name: route-to-openapi
+      prefix: /adaptadorsenalesmpa/openapi
+      urlRewrite: /openapi
+    - name: route-to-metrics
+      prefix: /adaptadorsenalesmpa/metrics
+      urlRewrite: /metrics
+    - name: route-to-ibm-api
+      prefix: /adaptadorsenalesmpa/ibm/api
+      urlRewrite: /ibm/api
+    - name: route-to-api
+      prefix: /adaptadorsenalesmpa/api
+      urlRewrite: /adaptadorsenalesmpa/api
+      corsPolicy:
+        allowCredentials: true
+        allowHeaders:
+        - '*'
+        allowOrigins:
+        - exact: '*'
+        allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+        - HEAD
+        - PUT
+        - DELETE
+        maxAge: 5m
+  authorization:
+    enabled: false
+  environment:

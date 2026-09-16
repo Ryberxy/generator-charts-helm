@@ -1,0 +1,56 @@
+spec:
+  name: mapeador-de-alertas-de-profesional
+  version: "1.0.0"
+  image:
+    pullPolicy: IfNotPresent
+    name: mapeador-de-alertas-de-profesional
+  replicaCount: 1
+  usage_level: low
+  autoscaling:
+    enabled: false
+  service:
+    sas_monitoring: false
+  container:
+    port: 9085
+  authentication:
+    enabled: false
+  trafficManagement:
+    ruleSet:
+    - name: route-to-health
+      prefix: /alertprojection/health
+      urlRewrite: /health
+    - name: route-to-openapi-ui
+      prefix: /alertprojection/openapi/ui
+      urlRewrite: /openapi/ui
+    - name: route-to-jwt
+      prefix: /alertprojection/jwt
+      urlRewrite: /jwt
+    - name: route-to-openapi
+      prefix: /alertprojection/openapi
+      urlRewrite: /openapi
+    - name: route-to-metrics
+      prefix: /alertprojection/metrics
+      urlRewrite: /metrics
+    - name: route-to-ibm-api
+      prefix: /alertprojection/ibm/api
+      urlRewrite: /ibm/api
+    - name: route-to-api
+      prefix: /alertprojection/api
+      urlRewrite: /alertprojection/api
+      corsPolicy:
+        allowCredentials: true
+        allowHeaders:
+        - '*'
+        allowOrigins:
+        - exact: '*'
+        allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+        - HEAD
+        - PUT
+        - DELETE
+        maxAge: 5m
+  authorization:
+    enabled: false
+  environment:

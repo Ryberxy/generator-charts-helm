@@ -1,0 +1,56 @@
+spec:
+  name: adaptador-eventos-prescripciones
+  version: "1.0.0"
+  image:
+    pullPolicy: IfNotPresent
+    name: adaptador-eventos-prescripciones
+  replicaCount: 1
+  usage_level: low
+  autoscaling:
+    enabled: false
+  service:
+    sas_monitoring: false
+  container:
+    port: 9093
+  authentication:
+    enabled: false
+  trafficManagement:
+    ruleSet:
+    - name: route-to-health
+      prefix: /bdu/health
+      urlRewrite: /health
+    - name: route-to-openapi-ui
+      prefix: /bdu/openapi/ui
+      urlRewrite: /openapi/ui
+    - name: route-to-jwt
+      prefix: /bdu/jwt
+      urlRewrite: /jwt
+    - name: route-to-openapi
+      prefix: /bdu/openapi
+      urlRewrite: /openapi
+    - name: route-to-metrics
+      prefix: /bdu/metrics
+      urlRewrite: /metrics
+    - name: route-to-ibm-api
+      prefix: /bdu/ibm/api
+      urlRewrite: /ibm/api
+    - name: route-to-api
+      prefix: /bdu/api
+      urlRewrite: /bdu/api
+      corsPolicy:
+        allowCredentials: true
+        allowHeaders:
+        - '*'
+        allowOrigins:
+        - exact: '*'
+        allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+        - HEAD
+        - PUT
+        - DELETE
+        maxAge: 5m
+  authorization:
+    enabled: false
+  environment:

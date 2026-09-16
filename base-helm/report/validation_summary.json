@@ -1,0 +1,441 @@
+{
+  "generated_at": "2026-04-21T11:16:13.590854",
+  "project_root": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm",
+  "chart_dir": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm",
+  "namespace": "oc-alert",
+  "app_install_name": "oc-alert",
+  "output_dir": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report",
+  "language_mode": "both",
+  "display_language": "es",
+  "reports": {
+    "es": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.es.md",
+    "en": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.en.md"
+  },
+  "reports_uri": {
+    "es": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.es.md",
+    "en": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.en.md"
+  },
+  "legacy_report": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.md",
+  "legacy_report_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.md",
+  "report": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.es.md",
+  "report_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.es.md",
+  "parse_errors": {},
+  "template_errors": [],
+  "env_var_format_issue_count": 0,
+  "consistency_issue_count": 0,
+  "similarity": {
+    "des-pre": {
+      "status": "warn",
+      "missing_objects_a": [],
+      "missing_objects_b": [],
+      "structure_diffs": [
+        "Service/oc-alert/alert-cca-gestorcatalogoalertas-msc-service",
+        "Service/oc-alert/alert-gev-consultaalerta-msc-service",
+        "Service/oc-alert/alert-gev-gestorestadoversionado-msc-service"
+      ],
+      "structure_diff_details": {
+        "Service/oc-alert/alert-cca-gestorcatalogoalertas-msc-service": [
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.type"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].nodePort"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].targetPort"
+          }
+        ],
+        "Service/oc-alert/alert-gev-consultaalerta-msc-service": [
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.type"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].nodePort"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].targetPort"
+          }
+        ],
+        "Service/oc-alert/alert-gev-gestorestadoversionado-msc-service": [
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.type"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].nodePort"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].targetPort"
+          }
+        ]
+      }
+    },
+    "des-pro": {
+      "status": "warn",
+      "missing_objects_a": [],
+      "missing_objects_b": [],
+      "structure_diffs": [
+        "Service/oc-alert/alert-cca-gestorcatalogoalertas-msc-service",
+        "Service/oc-alert/alert-gev-consultaalerta-msc-service",
+        "Service/oc-alert/alert-gev-gestorestadoversionado-msc-service"
+      ],
+      "structure_diff_details": {
+        "Service/oc-alert/alert-cca-gestorcatalogoalertas-msc-service": [
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.type"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].nodePort"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].targetPort"
+          }
+        ],
+        "Service/oc-alert/alert-gev-consultaalerta-msc-service": [
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.type"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].nodePort"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].targetPort"
+          }
+        ],
+        "Service/oc-alert/alert-gev-gestorestadoversionado-msc-service": [
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.type"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].nodePort"
+          },
+          {
+            "kind": "missing_in_b",
+            "path": "$.spec.ports[0].targetPort"
+          }
+        ]
+      }
+    },
+    "pre-pro": {
+      "status": "ok",
+      "missing_objects_a": [],
+      "missing_objects_b": [],
+      "structure_diffs": [],
+      "structure_diff_details": {}
+    }
+  },
+  "checklist": [
+    {
+      "id": "helm_template",
+      "label": "`helm template` sin errores en todos los entornos",
+      "done": true,
+      "detail": "OK"
+    },
+    {
+      "id": "yaml_parse",
+      "label": "Parseo YAML para DES/PRE/PRO",
+      "done": true,
+      "detail": "OK"
+    },
+    {
+      "id": "env_var_format",
+      "label": "Formato de variables de entorno en configMap/secrets (`MAYUSCULAS` con `_` opcional)",
+      "done": true,
+      "detail": "OK"
+    },
+    {
+      "id": "env_var_consistency",
+      "label": "Nombres de variables de entorno consistentes en DES/PRE/PRO",
+      "done": true,
+      "detail": "OK"
+    },
+    {
+      "id": "render_similarity",
+      "label": "Templates renderizados similares (permitiendo diferencias por entorno)",
+      "done": false,
+      "detail": "Hay avisos/errores o pares no comparables."
+    }
+  ],
+  "errors": [
+    {
+      "type": "similarity",
+      "env": "des-pre",
+      "message": "des-pre -> estado=warn",
+      "human_message": "Explicacion: los objetos renderizados no son equivalentes entre entornos (diferencia estructural o recursos faltantes).",
+      "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.es.md",
+      "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.es.md",
+      "doc_line": 20
+    },
+    {
+      "type": "similarity",
+      "env": "des-pro",
+      "message": "des-pro -> estado=warn",
+      "human_message": "Explicacion: los objetos renderizados no son equivalentes entre entornos (diferencia estructural o recursos faltantes).",
+      "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.es.md",
+      "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.es.md",
+      "doc_line": 37
+    }
+  ],
+  "recommendations": [
+    {
+      "message": "Hay alta repeticion de valores (95.1% de hojas iguales). Conviene una base comun y overrides minimos por entorno.",
+      "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\injectValues_DES.yaml",
+      "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/injectValues_DES.yaml"
+    },
+    {
+      "message": "DES: se detectan claves sensibles en values (ej: projects[0].spec.environment.secrets.DB_URL). Recomendado mover secretos a Secret manager/ExternalSecret.",
+      "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\injectValues_DES.yaml",
+      "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/injectValues_DES.yaml"
+    }
+  ],
+  "localized": {
+    "es": {
+      "report": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.es.md",
+      "report_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.es.md",
+      "checklist": [
+        {
+          "id": "helm_template",
+          "label": "`helm template` sin errores en todos los entornos",
+          "done": true,
+          "detail": "OK"
+        },
+        {
+          "id": "yaml_parse",
+          "label": "Parseo YAML para DES/PRE/PRO",
+          "done": true,
+          "detail": "OK"
+        },
+        {
+          "id": "env_var_format",
+          "label": "Formato de variables de entorno en configMap/secrets (`MAYUSCULAS` con `_` opcional)",
+          "done": true,
+          "detail": "OK"
+        },
+        {
+          "id": "env_var_consistency",
+          "label": "Nombres de variables de entorno consistentes en DES/PRE/PRO",
+          "done": true,
+          "detail": "OK"
+        },
+        {
+          "id": "render_similarity",
+          "label": "Templates renderizados similares (permitiendo diferencias por entorno)",
+          "done": false,
+          "detail": "Hay avisos/errores o pares no comparables."
+        }
+      ],
+      "errors": [
+        {
+          "type": "similarity",
+          "env": "des-pre",
+          "message": "des-pre -> estado=warn",
+          "human_message": "Explicacion: los objetos renderizados no son equivalentes entre entornos (diferencia estructural o recursos faltantes).",
+          "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.es.md",
+          "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.es.md",
+          "doc_line": 20
+        },
+        {
+          "type": "similarity",
+          "env": "des-pro",
+          "message": "des-pro -> estado=warn",
+          "human_message": "Explicacion: los objetos renderizados no son equivalentes entre entornos (diferencia estructural o recursos faltantes).",
+          "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.es.md",
+          "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.es.md",
+          "doc_line": 37
+        }
+      ],
+      "recommendations": [
+        {
+          "message": "Hay alta repeticion de valores (95.1% de hojas iguales). Conviene una base comun y overrides minimos por entorno.",
+          "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\injectValues_DES.yaml",
+          "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/injectValues_DES.yaml"
+        },
+        {
+          "message": "DES: se detectan claves sensibles en values (ej: projects[0].spec.environment.secrets.DB_URL). Recomendado mover secretos a Secret manager/ExternalSecret.",
+          "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\injectValues_DES.yaml",
+          "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/injectValues_DES.yaml"
+        }
+      ]
+    },
+    "en": {
+      "report": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.en.md",
+      "report_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.en.md",
+      "checklist": [
+        {
+          "id": "helm_template",
+          "label": "`helm template` without errors in all environments",
+          "done": true,
+          "detail": "OK"
+        },
+        {
+          "id": "yaml_parse",
+          "label": "YAML parse for DES/PRE/PRO",
+          "done": true,
+          "detail": "OK"
+        },
+        {
+          "id": "env_var_format",
+          "label": "Environment variable format in configMap/secrets (`UPPERCASE` with optional `_`)",
+          "done": true,
+          "detail": "OK"
+        },
+        {
+          "id": "env_var_consistency",
+          "label": "Environment variable names are consistent across DES/PRE/PRO",
+          "done": true,
+          "detail": "OK"
+        },
+        {
+          "id": "render_similarity",
+          "label": "Rendered templates are similar (allowing environment-specific differences)",
+          "done": false,
+          "detail": "There are warnings/errors or non-comparable pairs."
+        }
+      ],
+      "errors": [
+        {
+          "type": "similarity",
+          "env": "des-pre",
+          "message": "des-pre -> status=warn",
+          "human_message": "Explanation: rendered objects are not equivalent across environments (structural diff or missing resources).",
+          "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.en.md",
+          "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.en.md",
+          "doc_line": 20
+        },
+        {
+          "type": "similarity",
+          "env": "des-pro",
+          "message": "des-pro -> status=warn",
+          "human_message": "Explanation: rendered objects are not equivalent across environments (structural diff or missing resources).",
+          "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\report\\validation_report.en.md",
+          "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/report/validation_report.en.md",
+          "doc_line": 37
+        }
+      ],
+      "recommendations": [
+        {
+          "message": "High value duplication detected (95.1% equal leaf values). Use a shared base and minimal per-environment overrides.",
+          "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\injectValues_DES.yaml",
+          "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/injectValues_DES.yaml"
+        },
+        {
+          "message": "DES: sensitive keys detected in values (example: projects[0].spec.environment.secrets.DB_URL). Recommended: move secrets to Secret manager/ExternalSecret.",
+          "doc_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\injectValues_DES.yaml",
+          "doc_uri": "file:///C:/PROYECTOS/ALERTAS/plantillas_helm/gestor-alertas-helm/injectValues_DES.yaml"
+        }
+      ]
+    }
+  },
+  "manual_items": {
+    "pre_gateway": "alertas-gateway",
+    "pro_gateway": "alertas-gateway",
+    "pre_dns": {
+      "microservicio": "api-alertas-pre.sas.junta-andalucia.es",
+      "front": "NO_APLICA_EN_ESTA_ITERACION",
+      "api": "NO_APLICA_EN_ESTA_ITERACION"
+    },
+    "pro_dns": {
+      "microservicio": "api-alertas-pro.sas.junta-andalucia.es",
+      "front": "NO_APLICA_EN_ESTA_ITERACION",
+      "api": "NO_APLICA_EN_ESTA_ITERACION"
+    },
+    "pre_develop_deployment": "false",
+    "pro_develop_deployment": "false",
+    "source_files": {
+      "pre": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\injectValues_PRE.yaml",
+      "pro": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\injectValues_PRO.yaml"
+    },
+    "pre_versions": [
+      [
+        "projects/alert-cca-gestorcatalogoalertas-msc.yaml",
+        "develop-0"
+      ],
+      [
+        "projects/alert-gev-gestorestadoversionado-msc.yaml",
+        "develop-0"
+      ],
+      [
+        "projects/alert-gev-consultaalerta-msc.yaml",
+        "develop-0"
+      ]
+    ],
+    "pro_versions": [
+      [
+        "projects/alert-cca-gestorcatalogoalertas-msc.yaml",
+        "develop-0"
+      ],
+      [
+        "projects/alert-gev-gestorestadoversionado-msc.yaml",
+        "develop-0"
+      ],
+      [
+        "projects/alert-gev-consultaalerta-msc.yaml",
+        "develop-0"
+      ]
+    ],
+    "pre_projects": [
+      {
+        "config_file": "projects/alert-cca-gestorcatalogoalertas-msc.yaml",
+        "image_tag": "develop-0",
+        "image_name": "alert-cca-gestorcatalogoalertas-msc",
+        "image_ref": "alert-cca-gestorcatalogoalertas-msc:develop-0",
+        "project_file_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\projects\\alert-cca-gestorcatalogoalertas-msc.yaml"
+      },
+      {
+        "config_file": "projects/alert-gev-gestorestadoversionado-msc.yaml",
+        "image_tag": "develop-0",
+        "image_name": "alert-gev-gestorestadoversionado-msc",
+        "image_ref": "alert-gev-gestorestadoversionado-msc:develop-0",
+        "project_file_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\projects\\alert-gev-gestorestadoversionado-msc.yaml"
+      },
+      {
+        "config_file": "projects/alert-gev-consultaalerta-msc.yaml",
+        "image_tag": "develop-0",
+        "image_name": "alert-gev-consultaalerta-msc",
+        "image_ref": "alert-gev-consultaalerta-msc:develop-0",
+        "project_file_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\projects\\alert-gev-consultaalerta-msc.yaml"
+      }
+    ],
+    "pro_projects": [
+      {
+        "config_file": "projects/alert-cca-gestorcatalogoalertas-msc.yaml",
+        "image_tag": "develop-0",
+        "image_name": "alert-cca-gestorcatalogoalertas-msc",
+        "image_ref": "alert-cca-gestorcatalogoalertas-msc:develop-0",
+        "project_file_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\projects\\alert-cca-gestorcatalogoalertas-msc.yaml"
+      },
+      {
+        "config_file": "projects/alert-gev-gestorestadoversionado-msc.yaml",
+        "image_tag": "develop-0",
+        "image_name": "alert-gev-gestorestadoversionado-msc",
+        "image_ref": "alert-gev-gestorestadoversionado-msc:develop-0",
+        "project_file_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\projects\\alert-gev-gestorestadoversionado-msc.yaml"
+      },
+      {
+        "config_file": "projects/alert-gev-consultaalerta-msc.yaml",
+        "image_tag": "develop-0",
+        "image_name": "alert-gev-consultaalerta-msc",
+        "image_ref": "alert-gev-consultaalerta-msc:develop-0",
+        "project_file_path": "C:\\PROYECTOS\\ALERTAS\\plantillas_helm\\gestor-alertas-helm\\projects\\alert-gev-consultaalerta-msc.yaml"
+      }
+    ],
+    "changed_env_vars_pre_pro": {},
+    "changed_env_entries_pre_pro": []
+  }
+}

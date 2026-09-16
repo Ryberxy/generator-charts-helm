@@ -1,0 +1,219 @@
+{{- $namespace := .Release.Namespace -}}
+{{- $global := .Values.global | default dict -}}
+
+{{/*
+Especificaciones base por tipo de proyecto.
+*/}}
+{{- $microservicioValues := .Values.microservicio | default dict -}}
+{{- $frontValues := .Values.front | default dict -}}
+{{- $apiValues := .Values.api | default dict -}}
+
+{{- $defaultSpecMicroservicio := $microservicioValues.spec | default dict -}}
+{{- $defaultSpecFront := $frontValues.spec | default dict -}}
+{{- $defaultSpecApi := $apiValues.spec | default dict -}}
+
+{{- range $project := .Values.projects }}
+  {{- if not $project.configFile }}
+    {{- fail "Error: project.configFile is required" }}
+  {{- end }}
+
+  {{- if not $project.spec }}
+    {{- fail "Error: project.spec is required" }}
+  {{- end }}
+
+  {{- if not $project.spec.type }}
+    {{- fail "Error: project.spec.type is required" }}
+  {{- end }}
+
+  {{/*
+  Obtiene el fichero de configuración del proyecto desde projects/.
+  */}}
+  {{- $file := $.Files.Get $project.configFile }}
+
+  {{- if not $file }}
+    {{- fail (printf "Error: configuration file not found: %s" $project.configFile) }}
+  {{- end }}
+
+  {{- $deploy := ($file | fromYaml) | default dict -}}
+  {{- $prespec := dict -}}
+
+  {{/*
+  Aplica valores globales, valores base por tipo y valores del fichero
+  de proyecto, evitando modificar los diccionarios originales.
+  */}}
+  {{- if eq $project.spec.type "microservicio" }}
+    {{- $baseGlobal := deepCopy $global -}}
+    {{- $baseDefault := deepCopy $defaultSpecMicroservicio -}}
+    {{- $baseDeploy := deepCopy ($deploy.spec | default dict) -}}
+    {{- $prespec = mergeOverwrite $baseGlobal $baseDefault $baseDeploy -}}
+
+  {{- else if eq $project.spec.type "front" }}
+    {{- $baseGlobal := deepCopy $global -}}
+    {{- $baseDefault := deepCopy $defaultSpecFront -}}
+    {{- $baseDeploy := deepCopy ($deploy.spec | default dict) -}}
+    {{- $prespec = mergeOverwrite $baseGlobal $baseDefault $baseDeploy -}}
+
+  {{- else if eq $project.spec.type "api" }}
+    {{- $baseGlobal := deepCopy $global -}}
+    {{- $baseDefault := deepCopy $defaultSpecApi -}}
+    {{- $baseDeploy := deepCopy ($deploy.spec | default dict) -}}
+    {{- $prespec = mergeOverwrite $baseGlobal $baseDefault $baseDeploy -}}
+
+  {{- else }}
+    {{- fail (printf "Error: unknown project type: %s" $project.spec.type) }}
+  {{- end }}
+
+  {{/*
+  Los valores de projects/<aplicacion>.yaml tienen prioridad final.
+  */}}
+  {{- $baseProjectSpec := deepCopy ($project.spec | default dict) -}}
+  {{- $spec := mergeOverwrite (deepCopy $prespec) $baseProjectSpec -}}
+
+  {{/*
+  Validaciones mínimas de un proyecto desplegable.
+  */}}
+  {{- if not $spec.name }}
+    {{- fail "Error: spec.name is required" }}
+  {{- end }}
+
+  {{- if not $spec.image }}
+    {{- fail "Error: spec.image is required" }}
+  {{- end }}
+
+  {{- if not $spec.image.name }}
+    {{- fail "Error: spec.image.name is required" }}
+  {{- end }}
+
+  {{- if not $spec.service }}
+    {{- fail "Error: spec.service is required" }}
+  {{- end }}
+
+  {{- if not $spec.service.port }}
+    {{- fail "Error: spec.service.port is required" }}
+  {{- end }}
+
+  {{/*
+  Construcción de la imagen del contenedor.
+  */}}
+  {{- $registry := $global.registry | default dict -}}
+  {{- $registryDns := $registry.dns | default "" -}}
+  {{- $registryPath := $registry.path | default "" -}}
+  {{- $imageTag := $spec.imageTag | default "latest" -}}
+  {{- $imageBase := printf "%s:%s" $spec.image.name $imageTag -}}
+
+  {{- $imagePath := $imageBase -}}
+  {{- if and $registryDns $registryPath }}
+    {{- $imagePath = printf "%s/%s/%s" $registryDns $registryPath $imageBase -}}
+  {{- else if $registryDns }}
+    {{- $imagePath = printf "%s/%s" $registryDns $imageBase -}}
+  {{- end }}
+
+  {{/*
+  Los microservicios y APIs pueden utilizar el host compartido
+  configurado para su tipo de proyecto.
+  */}}
+  {{- $sharedIngressHost := "" -}}
+  {{- $useSharedIngressHost := false -}}
+
+  {{- if eq $project.spec.type "microservicio" }}
+    {{- $defaultIngress := $defaultSpecMicroservicio.ingress | default dict -}}
+    {{- $sharedIngressHost = $defaultIngress.host | default "" -}}
+    {{- $useSharedIngressHost = true -}}
+
+  {{- else if eq $project.spec.type "api" }}
+    {{- $defaultIngress := $defaultSpecApi.ingress | default dict -}}
+    {{- $sharedIngressHost = $defaultIngress.host | default "" -}}
+    {{- $useSharedIngressHost = true -}}
+  {{- end }}
+
+  {{/*
+  Contexto común usado por los subtemplates genéricos.
+  */}}
+  {{- $pkg := dict
+      "Generic" $spec
+      "namespace" $namespace
+      "imagePath" $imagePath
+      "UseSharedIngressHost" $useSharedIngressHost
+      "SharedIngressHost" $sharedIngressHost
+      "Root" $
+  -}}
+
+  {{/*
+  ConfigMap y Secret de variables de entorno.
+  */}}
+  {{- $environment := $spec.environment | default dict -}}
+
+  {{- if $environment.configMap }}
+    {{- include "generic.ConfigMap" $pkg }}
+  {{- end }}
+
+  {{- if $environment.secrets }}
+    {{- include "generic.Secret" $pkg }}
+  {{- end }}
+
+  {{/*
+  ConfigMap runtime específico para aplicaciones frontend.
+  */}}
+  {{- $runtimeConfig := $spec.runtimeConfig | default dict -}}
+
+  {{- if and
+      $runtimeConfig.enabled
+      $runtimeConfig.configMapName
+      $runtimeConfig.fileName
+  }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $runtimeConfig.configMapName }}
+  namespace: {{ $namespace }}
+data:
+  {{ $runtimeConfig.fileName }}: |
+{{ $runtimeConfig.data | default dict | toPrettyJson | indent 4 }}
+---
+  {{- end }}
+
+
+  {{/*
+  ConfigMap opcional para ficheros de configuración.
+  */}}
+  {{- $fileConfigMap := $spec.fileConfigMap | default dict -}}
+
+  {{- if and
+      $fileConfigMap.enabled
+      $fileConfigMap.name
+      $fileConfigMap.data
+  }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fileConfigMap.name }}
+  namespace: {{ $namespace }}
+data:
+  {{- range $key, $value := $fileConfigMap.data }}
+  {{ $key }}: |
+{{ tpl $value $ | indent 4 }}
+  {{- end }}
+---
+  {{- end }}
+
+  {{/*
+  Recursos principales de la aplicación.
+  */}}
+  {{- include "generic.Service" $pkg }}
+  {{- include "generic.Deployment" $pkg }}
+
+  {{- $autoscaling := $spec.autoscaling | default dict -}}
+  {{- if $autoscaling.enabled }}
+    {{- include "generic.HorizontalPodAutoscaler" $pkg }}
+  {{- end }}
+
+  {{- $trafficManagement := $spec.trafficManagement | default dict -}}
+  {{- $ingress := $spec.ingress | default dict -}}
+
+  {{- if and
+      $trafficManagement.ruleSet
+      (or $ingress.enabled $useSharedIngressHost)
+  }}
+    {{- include "generic.istio.VirtualService" $pkg }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "helm-generator"
+version = "0.1.0"
+description = "Herramienta para generación y validación de charts Helm"
+requires-python = ">=3.11"
+dependencies = [
+  "PyYAML==6.0.2"
+]
+
+[project.scripts]
+helm-generator = "helm_generator.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

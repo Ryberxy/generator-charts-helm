@@ -1,0 +1,75 @@
+spec:
+  name: proxy-cliente-seguro-maco-rxxi
+  version: 1.0.0
+  image:
+    pullPolicy: IfNotPresent
+    name: proxy-cliente-seguro-maco-rxxi
+  replicaCount: 1
+  usage_level: low
+  autoscaling:
+    enabled: false
+  service:
+    sas_monitoring: false
+  container:
+    port: 9094
+  authentication:
+    enabled: false
+  trafficManagement:
+    ruleSet:
+    - name: route-to-health
+      prefix: /rxxi/health
+      urlRewrite: /health
+    - name: route-to-openapi-ui
+      prefix: /rxxi/openapi/ui
+      urlRewrite: /openapi/ui
+    - name: route-to-jwt
+      prefix: /jwt
+      urlRewrite: /rxxi/jwt
+    - name: route-to-openapi
+      prefix: /rxxi/openapi
+      urlRewrite: /openapi
+    - name: route-to-metrics
+      prefix: /rxxi/metrics
+      urlRewrite: /metrics
+    - name: route-to-ibm-api
+      prefix: /rxxi/ibm/api
+      urlRewrite: /ibm/api
+    - name: route-to-api
+      prefix: /rxxi/api
+      urlRewrite: /rxxi/api
+      corsPolicy:
+        allowCredentials: true
+        allowHeaders:
+        - '*'
+        allowOrigins:
+        - exact: '*'
+        allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+        - HEAD
+        - PUT
+        - DELETE
+        maxAge: 5m
+  authorization:
+    enabled: false
+  environment:
+    configMap:
+      RXXI_PAGE_COUNT: '200'
+      RXXI_STATUS_FILTER: active
+      RXXI_VERSION_HEADER: v1.2
+      RXXI_TIMEOUT_REQUEST: '5000'
+      MACO_API_CONFIG_MACOIDVERSION: 3.0.1
+      MACO_API_CONFIG_MODULECODE: '341'
+      MACO_API_CONFIG_TICKET_TTL: '3600000'
+      MACO_API_CONFIG_TICKET_FUTURETOLERANCE: '36000000'
+      MACO_API_CONFIG_TICKET_PERMISSIONS: GET_PRESC
+      MACO_API_CONFIG_TICKET_RSAKEY: <RSAKeyValue><Modulus>pJbz24aBed556dtzQGn7Dn+NmaaEWONSg82HQLn3T2x0DkTQEuU40Shr5jcLTyvwxRxA0HG7NlYE7JEPLoUCKIpdBh5sRonn4ZGgF7jYIhWaHqT4sB7+oCVazdKe5c1EmBwS9c0JJPiU4mPSeVEY4NbRduxakMHp/jjMJe25OamWex8cn3ktEPbe15OWCN9hoTnK/anGQmXkzWL/YDNI7WwXIpCI2hxEt3l0AhkgZecOwTYn08wj7YTei8I15pXYiV1nNuxB5AuZrTVxFIwXYHOonblWoubJa68dAkCr5leNfuIa/JzyBAsHMnXU4aLOlrJgQx5yRdd7n0g1YMF9uw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>
+      MACO_API_CONFIG_TICKET_TICKETVALIDATIONS: FUTURE,EXPIRED,PERMISSION,SIGNATURE
+      MACO_USERNAME: Disp30
+      MACO_PASSWORD: '12345678'
+      MACO_TIMEOUT: '30000'
+      MACO_AUTH_CONNECT_TIMEOUT: '5000'
+      MACO_AUTH_READ_TIMEOUT: '30000'
+      RXXI_CONNECT_TIMEOUT: '5000'
+      RXXI_READ_TIMEOUT: '10000'

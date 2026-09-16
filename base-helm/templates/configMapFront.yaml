@@ -1,0 +1,17 @@
+{{- $front := .Values.front | default dict -}}
+{{- $frontSpec := $front.spec | default dict -}}
+{{- $runtimeConfig := $frontSpec.runtimeConfig | default dict -}}
+
+{{- if $runtimeConfig.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $runtimeConfig.configMapName | default (printf "%s-front-runtime-config" .Release.Name) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  {{ $runtimeConfig.fileName | default "config.json" }}: |
+{{ ($runtimeConfig.data | default dict) | toPrettyJson | indent 4 }}
+{{- end }}

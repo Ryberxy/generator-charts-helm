@@ -1,0 +1,366 @@
+global:
+  nameSpace: sas-alertas
+  registry:
+    dns: dml-si.sas.junta-andalucia.es:8084
+    path: asistencial/gestion-centralizada-de-alertas-a-profesionales
+  ingress:
+    enabled: true
+    gateway: alertas-gateway
+    name: alertas-ingress
+  developDeployment: false
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+microservicio:
+  spec:
+    replicaCount: 1
+    ingress:
+      host: api-alertas-pre.sas.junta-andalucia.es
+    usageSpec:
+      low:
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 750m
+            memory: 768Mi
+      medium:
+        resources:
+          requests:
+            cpu: 750m
+            memory: 512Mi
+          limits:
+            cpu: '1.5'
+            memory: 1Gi
+      high:
+        resources:
+          requests:
+            cpu: '1'
+            memory: 768Mi
+          limits:
+            cpu: '1.5'
+            memory: 1536Mi
+      very_high:
+        resources:
+          requests:
+            cpu: '1'
+            memory: 768Mi
+          limits:
+            cpu: '1.5'
+            memory: 1792Mi
+    service:
+      port: 9080
+      sas_monitoring: true
+      metricsPath: /metrics
+    container:
+      port: 9080
+    corsPolicy:
+      allowCredentials: true
+      allowHeaders:
+      - '*'
+      allowOrigins:
+      - exact: '*'
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      - HEAD
+      - PUT
+      - DELETE
+    environment:
+      configMap: {}
+    readinessProbe:
+      httpGet:
+        path: /health/ready
+        port: 9080
+      initialDelaySeconds: 60
+      timeoutSeconds: 30
+      periodSeconds: 60
+      failureThreshold: 6
+    livenessProbe:
+      httpGet:
+        path: /health/live
+        port: 9080
+      initialDelaySeconds: 60
+      timeoutSeconds: 30
+      periodSeconds: 60
+front:
+  spec:
+    replicaCount: 1
+    ingress:
+      host: alertas-front-pre.sas.junta-andalucia.es
+    service:
+      port: 8080
+    container:
+      port: 8080
+    usageSpec:
+      low:
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 768Mi
+configMapFront: {}
+kafka:
+  security:
+    enabled: true
+    caFilePath: /opt/certs/sas-cluster-cluster-ca-cert-pre.crt
+    certData: '-----BEGIN CERTIFICATE-----
+      MIIFLTCCAxWgAwIBAgIUXr6J5a+dblIYqfx1KtpopgH1CjkwDQYJKoZIhvcNAQEN
+      BQAwLTETMBEGA1UECgwKaW8uc3RyaW16aTEWMBQGA1UEAwwNY2x1c3Rlci1jYSB2
+      MDAeFw0yNjAzMTYxMTE4NDFaFw0yNzAzMTYxMTE4NDFaMC0xEzARBgNVBAoMCmlv
+      LnN0cmltemkxFjAUBgNVBAMMDWNsdXN0ZXItY2EgdjAwggIiMA0GCSqGSIb3DQEB
+      AQUAA4ICDwAwggIKAoICAQCoW+pRqQlnrDq1ocXVa+i+qjcrwUc/r+pfK3AX6mt3
+      ije1JiiWpqJ8/aeZL4EFDdDcXiFeLNUGtOCNwd/fpikYWv5jS42hzgDskTqulrG1
+      Tu+AsvZWLu4kjSyUf1PJy2LIO1erqZTVEmevbonDdQH3NbhkfdQPg361mMMhDOUm
+      vONscX/Sf+l37yCZZIB/DjiELtfisWOFAn6biyKBL61a1NSVxWlRIhkeQsavJzvp
+      WZ3CzXdOuxFVO/y2tcIIDrqgr+BQ+rVApezzlltaqpIe7LRZh8t2VUg9ncRn5OiH
+      8Qmm/IEDsOQAhmLydQ8IKbS0rUzXx8oK2QsdPRTLQQgsQ1P2ZMteZB+fU9LlMiaq
+      YfeZO9D0jyL9UBlDBjj71b0Z2htYzMhkv7TsB+XQTTRFgQtu62QUARmpokQ2BO3d
+      4zB0x0lLoeBdu94UxfDAi/TL20Cr3j0aiR4cvU+wf/1xAwhRCD5B2zZyW5p/YPAD
+      O9HdFlEbXpXgWcyGgMPIr0B8jgdieyDELBCYtqypVR5B7SqhM2iAM3xAZ9caRHd1
+      6SVAI7bVzb8JZTgHUTTnIsc7YrQpmbzb6vIVPAq3GAxVhJDY6lK9zxNKp2Xy7M4z
+      gaS2rbX4FJofdHFC2GRfynJu1ZY+DTd7+vVsm5B5Rz0l5ETflGMwdXqbfGc9Wn9H
+      twIDAQABo0UwQzAdBgNVHQ4EFgQUfnKicOHcHzvjKAZ6far3dLxD5ckwEgYDVR0T
+      AQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAQYwDQYJKoZIhvcNAQENBQADggIB
+      AKIcJ3KxMXMYHJQtJZpNaR3CVFUsjYNIYadfvG3hry982XkC2rwZ8OYdrLhAvs/z
+      fAQI8ui2JTYdSFzR67ADpx28631w7MwY22n2R1EMUkpcaK5k0R6UpUZRukWLNtG+
+      RGQs6Ut3ulfK0qaRVOcw8uLPWwNONPRemIvKGvtW15nByee++JAVrm6azFvvphme
+      NjiWRK79nA4UtcQVkwfd4BNcCvOWJzthDVIXmGA0uPGbly5VuP1+vvpBw/qUVIL2
+      XEV1M0FktbbSwCXDJZQHVFYhFXmbzBVKdivpDOkBHP7N8nxqfZG5gV8Uxlr16V2k
+      L+GteRcEtXyuEukw+2vnKyIiBRobEijVmfyr9S0GT/0+PbJvX9KtSjNL6aBrt3lk
+      mbEzgQqebwKz2o6eSdaRx/fnUXR+85drY1hi5VAh60kgDw30sUbE8kydp+LBCie9
+      2PbxnyKS2v26lXs1yWqmXklH83O6fE05yGZVCWtPGt+aATGbq3FaoatIPM1sNmzy
+      q4ydNqzpRpy4OOmgTe6Ep2sN/UNBdrtaR8tMPuHtzMWllerPBKHe1BBi30vfFWmx
+      9XKPMQcRKF3nWHTcBAM/1m15rjARniFa3OltRc51WkZqwDoxOdgYW/Q3ewxgYIWv
+      FIv/17AHUA7P8tuS1ZQcwyFJzoeNZ4uXDnzLVyvv8rC1
+      -----END CERTIFICATE-----'
+projects:
+- configFile: projects/catalogo-de-alertas-api.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.2
+    environment:
+      secrets:
+        DB_URL: jdbc:oracle:thin:@//bd-alertas.pre.sas.junta-andalucia.es:1560/ALERTAS
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_CCA
+        DB_USER: APP_ALERTAS_CCA
+        DB_PASSWORD: A_RELLENAR_POR_CTI
+        ltpa_keys_password: alertasLtpaKeys01
+      configMap:
+        CORS_ALLOWED_ORIGINS: https://alertas-front-pre.sas.junta-andalucia.es
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_LOCATION: /opt/certs/sas-cluster-cluster-ca-cert-pre.crt
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_BOOTSTRAP_SERVERS: sas-cluster-kafka-bootstrap.amq-streams.svc:9093
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SECURITY_PROTOCOL: SASL_SSL
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_TYPE: PEM
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+    runtimePodAnnotations:
+      traffic.sidecar.istio.io/excludeOutboundPorts: "9093"
+- configFile: projects/alertas-profesional-bff.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.3
+    environment:
+      configMap:
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_LOCATION: /opt/certs/sas-cluster-cluster-ca-cert-pre.crt
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_BOOTSTRAP_SERVERS: sas-cluster-kafka-bootstrap.amq-streams.svc:9093
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SECURITY_PROTOCOL: SASL_SSL
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_TYPE: PEM
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+        ALERT_SNAPSHOT_UPSTREAM_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/manager
+        ALERT_DETAIL_UPSTREAM_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/manager
+        ALERT_MANAGE_UPSTREAM_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/manager
+        KAFKA_INCOMING_NEW_ALERT_EVENT_IN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-consumer" password="dPw5YnWxtXp9Hc9VODAwxJvkd2A3pJzc";
+        KAFKA_OUTGOING_EVALUATE_ALERT_EVENT_OUT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+    runtimePodAnnotations:
+      traffic.sidecar.istio.io/excludeOutboundPorts: "9093"
+- configFile: projects/proxy-cliente-seguro-maco-rxxi.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.1
+    environment:
+      configMap:
+        RXXI_BASE_URL: http://api-1.pre.sas.junta-andalucia.es
+        MACO_API_CONFIG_URL: http://ws-maco-pre.diraya-test.sspa.junta-andalucia.es
+- configFile: projects/administrador-tipos-alertas-app-mf.yaml
+  spec:
+    type: front
+    imageTag: 1.0.0.1
+    environment: {}
+- configFile: projects/alertas-a-profesional-app-mf.yaml
+  spec:
+    type: front
+    imageTag: 1.0.0.1
+    environment: {}
+- configFile: projects/registro-de-alertas-centralizado-api.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.2
+    environment:
+      secrets:
+        DB_URL: jdbc:oracle:thin:@//bd-alertas.pre.sas.junta-andalucia.es:1560/ALERTAS
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_GEV
+        DB_USER: APP_ALERTAS_GEV
+        DB_PASSWORD: A_RELLENAR_POR_CTI
+- configFile: projects/motor-evaluacion-eventos.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.2
+    environment:
+      configMap:
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_LOCATION: /opt/certs/sas-cluster-cluster-ca-cert-pre.crt
+        KAFKA_OUTGOING_CONNECTOR: sas-cluster-kafka-bootstrap.amq-streams.svc:9093
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SECURITY_PROTOCOL: SASL_SSL
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_TYPE: PEM
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+        CCA_ALERTS_API_URL: https://api-alertas-pre.sas.junta-andalucia.es/gestorcatalogoalertas
+        KAFKA_INCOMING_NEW_ALERT_EVENT_IN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-consumer" password="dPw5YnWxtXp9Hc9VODAwxJvkd2A3pJzc";
+        KAFKA_OUTGOING_POSSIBLE_ALERT_EVALUATED_EVENT_CHANNEL_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+      secrets:
+        DB_URL: jdbc:oracle:thin:@//bd-alertas.pre.sas.junta-andalucia.es:1560/ALERTAS
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_CHA
+        DB_USER: APP_ALERTAS_CHA
+        DB_PASSWORD: A_RELLENAR_POR_CTI
+        ltpa_keys_password: alertasLtpaKeys01
+    runtimePodAnnotations:
+      traffic.sidecar.istio.io/excludeOutboundPorts: "9093"
+- configFile: projects/mapeador-de-alertas-de-profesional.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.1
+    environment:
+      secrets:
+        DB_URL: jdbc:oracle:thin:@//bd-alertas.pre.sas.junta-andalucia.es:1560/ALERTAS
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_EAP
+        DB_USER: APP_ALERTAS_EAP
+        DB_PASSWORD: A_RELLENAR_POR_CTI
+- configFile: projects/controlador-de-estados-alerta-profesional.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.1
+    environment:
+      secrets:
+        DB_URL: jdbc:oracle:thin:@//bd-alertas.pre.sas.junta-andalucia.es:1560/ALERTAS
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_EAP
+        DB_USER: APP_ALERTAS_EAP
+        DB_PASSWORD: A_RELLENAR_POR_CTI
+        ltpa_keys_password: alertasLtpaKeys01
+- configFile: projects/gestor-snapshot-alertas-profesional.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.2
+    environment:
+      secrets:
+        DB_URL: jdbc:oracle:thin:@//bd-alertas.pre.sas.junta-andalucia.es:1560/ALERTAS
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_EAP
+        DB_USER: APP_ALERTAS_EAP
+        DB_PASSWORD: A_RELLENAR_POR_CTI
+- configFile: projects/gestor-estados-alerta-profesional-api.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.4
+    environment:
+      configMap:
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_LOCATION: /opt/certs/sas-cluster-cluster-ca-cert-pre.crt
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_BOOTSTRAP_SERVERS: sas-cluster-kafka-bootstrap.amq-streams.svc:9093
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SECURITY_PROTOCOL: SASL_SSL
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_TYPE: PEM
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+        ALERT_EVALUATOR_UPSTREAM_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/evaluador
+        ALERT_PROJECTION_UPSTREAM_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/alertprojection
+        ALERT_SNAPSHOT_UPSTREAM_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/generarsnapshot
+        KAFKA_INCOMING_ALERT_UPDATED_EVENT_IN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-consumer" password="dPw5YnWxtXp9Hc9VODAwxJvkd2A3pJzc";
+        KAFKA_OUTGOING_ALERT_MANAGER_EVENTS_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+      secrets:
+        DB_URL: jdbc:oracle:thin:@//bd-alertas.pre.sas.junta-andalucia.es:1560/ALERTAS
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_EAP
+        DB_USER: APP_ALERTAS_EAP
+        DB_PASSWORD: A_RELLENAR_POR_CTI
+    runtimePodAnnotations:
+      traffic.sidecar.istio.io/excludeOutboundPorts: "9093"
+- configFile: projects/compositor-evento-a-hecho-evaluable.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.4
+    environment:
+      configMap:
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_LOCATION: /opt/certs/sas-cluster-cluster-ca-cert-pre.crt
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_BOOTSTRAP_SERVERS: sas-cluster-kafka-bootstrap.amq-streams.svc:9093
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SECURITY_PROTOCOL: SASL_SSL
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_TYPE: PEM
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+        RXXI_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/rxxi
+        KAFKA_INCOMING_POSSIBLE_ALERT_EVALUATED_EVENT_IN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-consumer" password="dPw5YnWxtXp9Hc9VODAwxJvkd2A3pJzc";
+        KAFKA_OUTGOING_EVALUABLE_ALERT_FACT_CREATED_EVENT_OUT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+      secrets:
+        DB_URL: jdbc:oracle:thin:@//bd-alertas.pre.sas.junta-andalucia.es:1560/ALERTAS
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_CHA
+        DB_USER: APP_ALERTAS_CHA
+        DB_PASSWORD: A_RELLENAR_POR_CTI
+    runtimePodAnnotations:
+      traffic.sidecar.istio.io/excludeOutboundPorts: "9093"
+- configFile: projects/gestor-cdv-alertas.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.4
+    environment:
+      configMap:
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_LOCATION: /opt/certs/sas-cluster-cluster-ca-cert-pre.crt
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_BOOTSTRAP_SERVERS: sas-cluster-kafka-bootstrap.amq-streams.svc:9093
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SECURITY_PROTOCOL: SASL_SSL
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_TYPE: PEM
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+        CCA_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/gestorcatalogoalertas
+        KAFKA_INCOMING_EVALUATE_ALERT_IN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-consumer" password="dPw5YnWxtXp9Hc9VODAwxJvkd2A3pJzc";
+        KAFKA_OUTGOING_ALERT_UPDATE_EVENT_OUT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+      secrets:
+        DB_URL: jdbc:oracle:thin:@//bd-alertas.pre.sas.junta-andalucia.es:1560/ALERTAS
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_GEV
+        DB_USER: APP_ALERTAS_GEV
+        DB_PASSWORD: A_RELLENAR_POR_CTI
+    runtimePodAnnotations:
+      traffic.sidecar.istio.io/excludeOutboundPorts: "9093"
+- configFile: projects/motor-evaluador-hechos.yaml
+  spec:
+    type: microservicio
+    imageTag: 1.0.0.2
+    environment:
+      configMap:
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_LOCATION: /opt/certs/sas-cluster-cluster-ca-cert-pre.crt
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_BOOTSTRAP_SERVERS: sas-cluster-kafka-bootstrap.amq-streams.svc:9093
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SECURITY_PROTOCOL: SASL_SSL
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SSL_TRUSTSTORE_TYPE: PEM
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+        MP_MESSAGING_CONNECTOR_LIBERTY_KAFKA_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+        CCA_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/gestorcatalogoalertas
+        GEV_BASE_URL: https://api-alertas-pre.sas.junta-andalucia.es/consultaalertas
+        KAFKA_OUTGOING_EVALUATE_ALERT_EVENT_OUT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-producer" password="GToh88TkengR4iVgVCEH9GMBzW5dQxCo";
+        KAFKA_INCOMING_EVALUABLE_ALERT_FACT_CREATED_EVENT_IN_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+          required username="alertas-consumer" password="dPw5YnWxtXp9Hc9VODAwxJvkd2A3pJzc";
+    runtimePodAnnotations:
+      traffic.sidecar.istio.io/excludeOutboundPorts: "9093"

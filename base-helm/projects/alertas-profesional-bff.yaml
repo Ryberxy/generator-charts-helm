@@ -1,0 +1,77 @@
+spec:
+  name: alertas-profesional-bff
+  version: 1.0.0
+  image:
+    pullPolicy: IfNotPresent
+    name: alertas-profesional-bff
+  replicaCount: 1
+  usage_level: low
+  autoscaling:
+    enabled: false
+  service:
+    sas_monitoring: false
+  container:
+    port: 9095
+  authentication:
+    enabled: false
+  trafficManagement:
+    ruleSet:
+    - name: route-to-health
+      prefix: /usuarioalertbff/health
+      urlRewrite: /health
+    - name: route-to-openapi-ui
+      prefix: /usuarioalertbff/openapi/ui
+      urlRewrite: /openapi/ui
+    - name: route-to-jwt
+      prefix: /usuarioalertbff/jwt
+      urlRewrite: /jwt
+    - name: route-to-openapi
+      prefix: /usuarioalertbff/openapi
+      urlRewrite: /openapi
+    - name: route-to-metrics
+      prefix: /usuarioalertbff/metrics
+      urlRewrite: /metrics
+    - name: route-to-ibm-api
+      prefix: /usuarioalertbff/ibm/api
+      urlRewrite: /ibm/api
+    - name: route-to-api
+      prefix: /usuarioalertbff/api
+      urlRewrite: /usuarioalertbff/api
+      corsPolicy:
+        allowCredentials: true
+        allowHeaders:
+        - '*'
+        allowOrigins:
+        - exact: '*'
+        allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+        - HEAD
+        - PUT
+        - DELETE
+        maxAge: 5m
+  authorization:
+    enabled: false
+  kafka:
+    enable: true
+  environment:
+    configMap:
+      KAFKA_OUTGOING_EVALUATE_ALERT_EVENT_TOPIC: alertas.evaluacion
+      KAFKA_OUTGOING_NEW_ALERT_EVENT_TOPIC: alertas.evento
+      KAFKA_INCOMING_USER_ALERT_DELIVERY_TOPIC: alertas.userAlert
+      KAFKA_INCOMING_USER_ALERT_DELIVERY_GROUP_ID: alert-eal-usuarioalertbff-msc-user-alert-delivery-consumer
+      SSE_MAX_CHANNELS_PER_PATIENT: 10
+      SSE_MAX_CONNECTIONS: 1000
+      SSE_READINESS_WARNING_PERCENT: 80
+      SSE_READINESS_CRITICAL_PERCENT: 90
+      SSE_DEDUPLICATION_WINDOW_SIZE: 1000
+      SSE_MAX_PENDING_EVENTS: 100
+      SSE_MAX_PENDING_BYTES: 262144
+      SSE_INACTIVE_TIMEOUT_SECONDS: 90
+      ALERT_SNAPSHOT_UPSTREAM_PATH: /api/alerts/snapshot
+      ALERT_SNAPSHOT_UPSTREAM_TIMEOUT_MS: 30000
+      ALERT_DETAIL_UPSTREAM_PATH: /api/alerts
+      ALERT_DETAIL_UPSTREAM_TIMEOUT_MS: 30000
+      ALERT_MANAGE_UPSTREAM_PATH: /api/alerts/{alertId}/actions/manage
+      ALERT_MANAGE_UPSTREAM_TIMEOUT_MS: 30000

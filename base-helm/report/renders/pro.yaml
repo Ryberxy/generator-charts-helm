@@ -1,0 +1,500 @@
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alert-cca-gestorcatalogoalertas-msc-secret
+  namespace: oc-alert
+type: Opaque
+stringData:
+  DB_DEFAULT_SCHEMA: "OWN_ALERTAS_CCA_DEV"
+  DB_PASSWORD: "OWN_ALERTAS_CCA_DEV"
+  DB_URL: "jdbc:oracle:thin:@//10.200.128.5:1522/bd19c01"
+  DB_USER: "OWN_ALERTAS_CCA_DEV"
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alert-gev-gestorestadoversionado-msc-secret
+  namespace: oc-alert
+type: Opaque
+stringData:
+  DB_DEFAULT_SCHEMA: "OWN_ALERTAS_GEV_DEV"
+  DB_PASSWORD: "OWN_ALERTAS_GEV_DEV"
+  DB_URL: "jdbc:oracle:thin:@//10.200.128.5:1522/bd19c01"
+  DB_USER: "OWN_ALERTAS_GEV_DEV"
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alert-gev-consultaalerta-msc-secret
+  namespace: oc-alert
+type: Opaque
+stringData:
+  DB_DEFAULT_SCHEMA: "OWN_ALERTAS_GEV_DEV"
+  DB_PASSWORD: "OWN_ALERTAS_GEV_DEV"
+  DB_URL: "jdbc:oracle:thin:@//10.200.128.5:1522/bd19c01"
+  DB_USER: "OWN_ALERTAS_GEV_DEV"
+---
+# Source: gestor-alertas-helm/templates/configMapFront.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map-front
+data:
+ environments-configmap.json: "map[]"
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-cca-gestorcatalogoalertas-msc-service
+  namespace: oc-alert
+  labels:
+    app: alert-cca-gestorcatalogoalertas-msc
+    service: alert-cca-gestorcatalogoalertas-msc-service
+    sas_monitoring: "false"
+spec:
+  selector:
+    app: alert-cca-gestorcatalogoalertas-msc
+  ports:
+  - name: "http"
+    port: 9080
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-gev-gestorestadoversionado-msc-service
+  namespace: oc-alert
+  labels:
+    app: alert-gev-gestorestadoversionado-msc
+    service: alert-gev-gestorestadoversionado-msc-service
+    sas_monitoring: "false"
+spec:
+  selector:
+    app: alert-gev-gestorestadoversionado-msc
+  ports:
+  - name: "http"
+    port: 9080
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-gev-consultaalerta-msc-service
+  namespace: oc-alert
+  labels:
+    app: alert-gev-consultaalerta-msc
+    service: alert-gev-consultaalerta-msc-service
+    sas_monitoring: "false"
+spec:
+  selector:
+    app: alert-gev-consultaalerta-msc
+  ports:
+  - name: "http"
+    port: 9080
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-cca-gestorcatalogoalertas-msc
+  namespace: oc-alert
+  labels:
+    app: alert-cca-gestorcatalogoalertas-msc
+spec:
+  selector:
+    matchLabels:
+      app: alert-cca-gestorcatalogoalertas-msc
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alert-cca-gestorcatalogoalertas-msc
+        version: develop-0
+      annotations:
+        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/proxyCPU: "50m"
+        sidecar.istio.io/proxyMemory: "50Mi"
+    spec:
+      tolerations:
+        - key: "app-name"
+          operator: "Equal"
+          value: "democliente"
+          effect: "NoSchedule"
+      hostAliases:
+      - ip: "10.200.1.5"
+        hostnames:
+        - "maco.diraya.des"
+        - "wsbdu.diraya.des"
+        - "estructura.diraya.des"
+        - "comun.centrales.diraya.des"
+      containers:
+      - name: alert-cca-gestorcatalogoalertas-msc
+        image: dml-si.sas.junta-andalucia.es:8084/alertas/gestor-alertas/alert-cca-gestorcatalogoalertas-msc:develop-0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        resources:
+          requests:
+            cpu: 25m
+            memory: 300Mi
+          limits:
+            cpu: 400m
+            memory: 350Mi
+        readinessProbe:
+          failureThreshold: 6
+          httpGet:
+            path: /health/ready
+            port: 9080
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 30
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 9080
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 30
+        envFrom:
+        - secretRef:
+            name: alert-cca-gestorcatalogoalertas-msc-secret
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-gev-gestorestadoversionado-msc
+  namespace: oc-alert
+  labels:
+    app: alert-gev-gestorestadoversionado-msc
+spec:
+  selector:
+    matchLabels:
+      app: alert-gev-gestorestadoversionado-msc
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alert-gev-gestorestadoversionado-msc
+        version: develop-0
+      annotations:
+        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/proxyCPU: "50m"
+        sidecar.istio.io/proxyMemory: "50Mi"
+    spec:
+      tolerations:
+        - key: "app-name"
+          operator: "Equal"
+          value: "democliente"
+          effect: "NoSchedule"
+      hostAliases:
+      - ip: "10.200.1.5"
+        hostnames:
+        - "maco.diraya.des"
+        - "wsbdu.diraya.des"
+        - "estructura.diraya.des"
+        - "comun.centrales.diraya.des"
+      containers:
+      - name: alert-gev-gestorestadoversionado-msc
+        image: dml-si.sas.junta-andalucia.es:8084/alertas/gestor-alertas/alert-gev-gestorestadoversionado-msc:develop-0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        resources:
+          requests:
+            cpu: 25m
+            memory: 300Mi
+          limits:
+            cpu: 400m
+            memory: 350Mi
+        readinessProbe:
+          failureThreshold: 6
+          httpGet:
+            path: /health/ready
+            port: 9080
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 30
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 9080
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 30
+        envFrom:
+        - secretRef:
+            name: alert-gev-gestorestadoversionado-msc-secret
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-gev-consultaalerta-msc
+  namespace: oc-alert
+  labels:
+    app: alert-gev-consultaalerta-msc
+spec:
+  selector:
+    matchLabels:
+      app: alert-gev-consultaalerta-msc
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alert-gev-consultaalerta-msc
+        version: develop-0
+      annotations:
+        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/proxyCPU: "50m"
+        sidecar.istio.io/proxyMemory: "50Mi"
+    spec:
+      tolerations:
+        - key: "app-name"
+          operator: "Equal"
+          value: "democliente"
+          effect: "NoSchedule"
+      hostAliases:
+      - ip: "10.200.1.5"
+        hostnames:
+        - "maco.diraya.des"
+        - "wsbdu.diraya.des"
+        - "estructura.diraya.des"
+        - "comun.centrales.diraya.des"
+      containers:
+      - name: alert-gev-consultaalerta-msc
+        image: dml-si.sas.junta-andalucia.es:8084/alertas/gestor-alertas/alert-gev-consultaalerta-msc:develop-0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        resources:
+          requests:
+            cpu: 25m
+            memory: 300Mi
+          limits:
+            cpu: 400m
+            memory: 350Mi
+        readinessProbe:
+          failureThreshold: 6
+          httpGet:
+            path: /health/ready
+            port: 9080
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 30
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 9080
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 30
+        envFrom:
+        - secretRef:
+            name: alert-gev-consultaalerta-msc-secret
+---
+# Source: gestor-alertas-helm/templates/gateway.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: alertas-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - alertas-front.oc-alertas-dev.10.200.201.76.nip.io
+    - app-microservicio-productor.oc-alertas-dev.10.200.201.76.nip.io
+    - app-microservicio-consumidor.oc-alertas-dev.10.200.201.76.nip.io
+    port:
+      number: 80
+      name: http
+      protocol: HTTP
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: alert-cca-gestorcatalogoalertas-msc-virtualservice
+  namespace: oc-alert
+spec:
+  hosts:
+  - "alert-cca-gestorcatalogoalertas-msc.oc-alert.10.200.201.76.nip.io"
+  gateways:
+  - alertas-gateway
+  http:
+  - name: "route-to-openapi"
+    match:
+    - uri:
+        prefix: /openapi
+    rewrite:
+      uri: /openapi
+    route:
+    - destination:
+        host: alert-cca-gestorcatalogoalertas-msc-service
+        port:
+          number: 9080
+    corsPolicy:
+      allowCredentials: true
+      allowHeaders:
+      - '*'
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      - HEAD
+      - PUT
+      - DELETE
+      allowOrigins:
+      - exact: '*'
+  - name: "route-to-service"
+    match:
+    - uri:
+        prefix: /
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: alert-cca-gestorcatalogoalertas-msc-service
+        port:
+          number: 9080
+    corsPolicy:
+      allowCredentials: true
+      allowHeaders:
+      - '*'
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      - HEAD
+      - PUT
+      - DELETE
+      allowOrigins:
+      - exact: '*'
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: alert-gev-gestorestadoversionado-msc-virtualservice
+  namespace: oc-alert
+spec:
+  hosts:
+  - "alert-gev-gestorestadoversionado-msc.oc-alert.10.200.201.76.nip.io"
+  gateways:
+  - alertas-gateway
+  http:
+  - name: "route-to-openapi"
+    match:
+    - uri:
+        prefix: /openapi
+    rewrite:
+      uri: /openapi
+    route:
+    - destination:
+        host: alert-gev-gestorestadoversionado-msc-service
+        port:
+          number: 9080
+    corsPolicy:
+      allowCredentials: true
+      allowHeaders:
+      - '*'
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      - HEAD
+      - PUT
+      - DELETE
+      allowOrigins:
+      - exact: '*'
+  - name: "route-to-service"
+    match:
+    - uri:
+        prefix: /
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: alert-gev-gestorestadoversionado-msc-service
+        port:
+          number: 9080
+    corsPolicy:
+      allowCredentials: true
+      allowHeaders:
+      - '*'
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      - HEAD
+      - PUT
+      - DELETE
+      allowOrigins:
+      - exact: '*'
+---
+# Source: gestor-alertas-helm/templates/worker.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: alert-gev-consultaalerta-msc-virtualservice
+  namespace: oc-alert
+spec:
+  hosts:
+  - "alert-gev-consultaalerta-msc.oc-alert.10.200.201.76.nip.io"
+  gateways:
+  - alertas-gateway
+  http:
+  - name: "route-to-openapi"
+    match:
+    - uri:
+        prefix: /openapi
+    rewrite:
+      uri: /openapi
+    route:
+    - destination:
+        host: alert-gev-consultaalerta-msc-service
+        port:
+          number: 9080
+    corsPolicy:
+      allowCredentials: true
+      allowHeaders:
+      - '*'
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      - HEAD
+      - PUT
+      - DELETE
+      allowOrigins:
+      - exact: '*'
+  - name: "route-to-service"
+    match:
+    - uri:
+        prefix: /
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: alert-gev-consultaalerta-msc-service
+        port:
+          number: 9080
+    corsPolicy:
+      allowCredentials: true
+      allowHeaders:
+      - '*'
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      - HEAD
+      - PUT
+      - DELETE
+      allowOrigins:
+      - exact: '*'

@@ -1,0 +1,56 @@
+spec:
+  name: adaptador-eventos-laboratorio
+  version: "1.0.0"
+  image:
+    pullPolicy: IfNotPresent
+    name: adaptador-eventos-laboratorio
+  replicaCount: 1
+  usage_level: low
+  autoscaling:
+    enabled: false
+  service:
+    sas_monitoring: false
+  container:
+    port: 9092
+  authentication:
+    enabled: false
+  trafficManagement:
+    ruleSet:
+    - name: route-to-health
+      prefix: /adaptadorsenalessil/health
+      urlRewrite: /health
+    - name: route-to-openapi-ui
+      prefix: /adaptadorsenalessil/openapi/ui
+      urlRewrite: /openapi/ui
+    - name: route-to-jwt
+      prefix: /adaptadorsenalessil/jwt
+      urlRewrite: /jwt
+    - name: route-to-openapi
+      prefix: /adaptadorsenalessil/openapi
+      urlRewrite: /openapi
+    - name: route-to-metrics
+      prefix: /adaptadorsenalessil/metrics
+      urlRewrite: /metrics
+    - name: route-to-ibm-api
+      prefix: /adaptadorsenalessil/ibm/api
+      urlRewrite: /ibm/api
+    - name: route-to-api
+      prefix: /adaptadorsenalessil/api
+      urlRewrite: /adaptadorsenalessil/api
+      corsPolicy:
+        allowCredentials: true
+        allowHeaders:
+        - '*'
+        allowOrigins:
+        - exact: '*'
+        allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+        - HEAD
+        - PUT
+        - DELETE
+        maxAge: 5m
+  authorization:
+    enabled: false
+  environment:

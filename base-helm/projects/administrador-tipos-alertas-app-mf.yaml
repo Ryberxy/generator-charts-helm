@@ -1,0 +1,76 @@
+spec:
+  name: administrador-tipos-alertas-app-mf
+  version: "1.0.0"
+  image:
+    pullPolicy: "IfNotPresent"
+    name: "administrador-tipos-alertas-app-mf"
+  replicaCount: 1 # Número de contenedores (Pod) que serán creados en el ReplicaSet del Deployment
+  usage_level: "low"
+  autoscaling:
+    enabled: false
+    targetCPUUtilizationValue: "700m"
+    targetMemoryUtilizationValue: "600Mi"
+  service:
+    #nodePort: 32767
+    sas_monitoring: true
+  ingress:
+    enabled: true # Indica si se creará un VirtualService
+  authentication:
+    enabled: false
+  trafficManagement:
+    ruleSet:
+      # Rutas de la app SPA
+      - name: "route-to-front-catalogoalertas"
+        prefix: "/catalogoalertas"
+        urlRewrite: "/"
+      # config-map.json en la RAÍZ (NO rewrite)
+      - name: config-root
+        exact: /config-map.json
+        urlRewrite: ""
+      # login-unico config en /config (NO rewrite)
+      - name: login-unico-config
+        exact: /config/login-unico-developer-kit.json
+        urlRewrite: ""
+  authorization:
+    enabled: false
+  # ¿Necesita Kafka?
+  kafka:
+    enable: false
+  environment:
+    configMap: ~
+
+  fileConfigMap:
+    enabled: true
+    requiresKeycloak: true
+    name: config-map-front-auth
+    data:
+      login-unico-developer-kit.json: |
+        {
+          "config": {
+            {{- if and (hasKey .Values "keycloak") (hasKey .Values.keycloak "enabled") .Values.keycloak.enabled (hasKey .Values.keycloak "url") (ne (.Values.keycloak.url | trim) "") }}
+            "idpUrl": "{{ .Values.keycloak.url | trim }}",
+            {{- end }}
+            "realm": "{{ default "loginunicoalerta" .Values.keycloak.realm }}",
+            "clientId": "{{ default "login-unico-developer-kit" .Values.keycloak.clientId }}"
+          },
+          "initOptions": {
+            "onLoad": "login-required",
+            "enableLogging": true
+          }
+        }
+
+  configFile:
+    enabled: true
+    configMapName: config-map-front
+    key: config-map.json
+    mountPath: /usr/share/nginx/html/config-map.json
+
+  volume:
+    enabled: true
+    requiresKeycloak: true
+    type: configMap
+    name: login-unico-config
+    configMapName: config-map-front-auth
+    fileName: login-unico-developer-kit.json
+    mountPath: /usr/share/nginx/html/config/login-unico-developer-kit.json
+    readOnly: true

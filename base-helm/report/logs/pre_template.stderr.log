@@ -1,0 +1,3 @@
+level=DEBUG msg="Original chart version" version=""
+level=DEBUG msg="Chart path" path=C:\PROYECTOS\ALERTAS\plantillas_helm\gestor-alertas-helm
+level=DEBUG msg="number of dependencies in the chart" chart=gestor-alertas-helm dependencies=0

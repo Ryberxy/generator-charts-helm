@@ -1,0 +1,18 @@
+{{- $hostsYaml := include "generic.ingressHosts" . | trim -}}
+{{- if $hostsYaml }}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ include "generic.gatewayName" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+{{ $hostsYaml | indent 8 }}
+      port:
+        number: 80
+        name: http
+        protocol: HTTP
+{{- end }}

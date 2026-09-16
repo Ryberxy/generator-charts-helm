@@ -1,0 +1,65 @@
+spec:
+  name: compositor-evento-a-hecho-evaluable
+  version: 1.0.0
+  image:
+    pullPolicy: IfNotPresent
+    name: compositor-evento-a-hecho-evaluable
+  replicaCount: 1
+  usage_level: low
+  autoscaling:
+    enabled: false
+  service:
+    sas_monitoring: false
+  container:
+    port: 9084
+  authentication:
+    enabled: false
+  trafficManagement:
+    ruleSet:
+    - name: route-to-health
+      prefix: /genhechoevaluablealerta/health
+      urlRewrite: /health
+    - name: route-to-openapi-ui
+      prefix: /genhechoevaluablealerta/openapi/ui
+      urlRewrite: /openapi/ui
+    - name: route-to-jwt
+      prefix: /genhechoevaluablealerta/jwt
+      urlRewrite: /jwt
+    - name: route-to-openapi
+      prefix: /genhechoevaluablealerta/openapi
+      urlRewrite: /openapi
+    - name: route-to-metrics
+      prefix: /genhechoevaluablealerta/metrics
+      urlRewrite: /metrics
+    - name: route-to-ibm-api
+      prefix: /genhechoevaluablealerta/ibm/api
+      urlRewrite: /ibm/api
+    - name: route-to-api
+      prefix: /genhechoevaluablealerta/api
+      urlRewrite: /genhechoevaluablealerta/api
+      corsPolicy:
+        allowCredentials: true
+        allowHeaders:
+        - '*'
+        allowOrigins:
+        - exact: '*'
+        allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+        - HEAD
+        - PUT
+        - DELETE
+        maxAge: 5m
+  authorization:
+    enabled: false
+  kafka:
+    enable: true
+  environment:
+    configMap:
+      POSSIBLE_ALERT_EVALUATED_EVENT_TOPIC: alertas.evaluacion-posible
+      EVALUABLE_ALERT_FACT_CREATED_EVENT_TOPIC: alertas.hecho-evaluable
+      MP_MESSAGING_OUTGOING_EVALUABLE_ALERT_FACT_CREATED_EVENT_OUT_CONNECTOR: liberty-kafka
+      MP_MESSAGING_OUTGOING_EVALUABLE_ALERT_FACT_CREATED_EVENT_OUT_TOPIC: alertas.hecho-evaluable
+      MP_MESSAGING_INCOMING_POSSIBLE_ALERT_EVALUATED_EVENT_IN_CONNECTOR: liberty-kafka
+      RXXI_EVIDENCIAS_PATH: /api/prescripciones/evidencias

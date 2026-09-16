@@ -1,0 +1,259 @@
+global:
+  nameSpace: oc_alert
+  registry:
+    dns: dml-si.sas.junta-andalucia.es:8084
+    path: asistencial/gestion-centralizada-de-alertas-a-profesionales
+  ingress:
+    enabled: true
+    gateway: alertas-gateway
+    name: alertas-ingress
+  developDeployment: false
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+microservicio:
+  spec:
+    replicaCount: 1
+    ingress:
+      host: api-alertas-pro.sas.junta-andalucia.es
+    usageSpec:
+      low:
+        resources:
+          requests:
+            cpu: 25m
+            memory: 300Mi
+          limits:
+            cpu: 400m
+            memory: 350Mi
+      medium:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 600Mi
+          limits:
+            cpu: 600m
+            memory: 700Mi
+      high:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 400Mi
+          limits:
+            cpu: '1'
+            memory: 800Mi
+        autoscaling:
+          minReplicas: 3
+          maxReplicas: 5
+          targetCPUUtilizationValue: 700m
+          targetMemoryUtilizationValue: 600Mi
+    service:
+      port: 9080
+      sas_monitoring: true
+      metricsPath: /metrics
+    container:
+      port: 9080
+    corsPolicy:
+      allowCredentials: true
+      allowHeaders:
+      - '*'
+      allowOrigins:
+      - exact: '*'
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      - HEAD
+      - PUT
+      - DELETE
+    environment:
+      configMap: {}
+    readinessProbe:
+      httpGet:
+        path: /health/ready
+        port: 9080
+      initialDelaySeconds: 60
+      timeoutSeconds: 30
+      periodSeconds: 60
+      failureThreshold: 6
+    livenessProbe:
+      httpGet:
+        path: /health/live
+        port: 9080
+      initialDelaySeconds: 60
+      timeoutSeconds: 30
+      periodSeconds: 60
+front:
+  spec:
+    replicaCount: 1
+    ingress:
+      host: alertas-front-pro.sas.junta-andalucia.es
+    service:
+      port: 8080
+    container:
+      port: 8080
+    usageSpec:
+      low:
+        resources:
+          requests:
+            cpu: 25m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+configMapFront: {}
+projects:
+- configFile: projects/catalogo-de-alertas-api.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_CCA_GESTORCATALOGOALERTAS_MSC_PRO
+    environment:
+      secrets:
+        DB_URL: PENDIENTE_DB_URL_CCA_PRO
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_CCA_PRO
+        DB_USER: APP_ALERTAS_CCA_PRO
+        DB_PASSWORD: PENDIENTE_DB_PASSWORD_CCA_PRO
+        ltpa_keys_password: PENDIENTE_LTPA_KEYS_PASSWORD_PRO
+      configMap:
+        CORS_ALLOWED_ORIGINS: https://alertas-front-pro.sas.junta-andalucia.es
+- configFile: projects/alertas-profesional-bff.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_EAL_USUARIOALERTBFF_MSC_PRO
+    environment:
+      configMap:
+        ALERT_SNAPSHOT_UPSTREAM_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/manager
+        ALERT_DETAIL_UPSTREAM_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/manager
+        ALERT_MANAGE_UPSTREAM_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/manager
+- configFile: projects/proxy-cliente-seguro-maco-rxxi.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_INT_RXXI_ACL_MSC_PRO
+    environment:
+      configMap:
+        RXXI_BASE_URL: https://api-2.sas.junta-andalucia.es/
+        MACO_API_CONFIG_URL: http://ws-maco-pre.diraya-test.sspa.junta-andalucia.es
+- configFile: projects/adaptador-eventos-prescripciones.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_INT_BDU_ACL_MSC_PRO
+    environment: {}
+- configFile: projects/adaptador-eventos-laboratorio.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_INT_ADAPTADORSENALESSIL_MSC_PRO
+    environment: {}
+- configFile: projects/adaptador-eventos-pruebas-analiticas.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_INT_ADAPTADORSENALESMPA_MSC_PRO
+    environment: {}
+- configFile: projects/administrador-tipos-alertas-app-mf.yaml
+  spec:
+    type: front
+    imageTag: PENDIENTE_TAG_ALERT_CCA_CATALOGOALERTAS_HOST_PRO
+    environment: {}
+- configFile: projects/alertas-a-profesional-app-mf.yaml
+  spec:
+    type: front
+    imageTag: PENDIENTE_TAG_ALERT_EAL_USUARIOALERTAS_HOST_PRO
+    environment: {}
+- configFile: projects/registro-de-alertas-centralizado-api.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_GEV_CONSULTAALERTAS_MSC_PRO
+    environment:
+      secrets:
+        DB_URL: PENDIENTE_DB_URL_GEV_PRO
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_GEV_PRO
+        DB_USER: APP_ALERTAS_GEV_PRO
+        DB_PASSWORD: PENDIENTE_DB_PASSWORD_GEV_PRO
+- configFile: projects/motor-evaluacion-eventos.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_CHA_EVALUACONDICIONESPOSIBLESALERTA_MSC_PRO
+    environment:
+      secrets:
+        DB_URL: PENDIENTE_DB_URL_CHA_PRO
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_CHA_PRO
+        DB_USER: APP_ALERTAS_CHA_PRO
+        DB_PASSWORD: PENDIENTE_DB_PASSWORD_CHA_PRO
+        ltpa_keys_password: PENDIENTE_LTPA_KEYS_PASSWORD_PRO
+      configMap:
+        CCA_ALERTS_API_URL: https://api-alertas-pro.sas.junta-andalucia.es/gestorcatalogoalertas
+- configFile: projects/mapeador-de-alertas-de-profesional.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_EAP_ALERTPROJECTION_MSC_PRO
+    environment:
+      secrets:
+        DB_URL: PENDIENTE_DB_URL_EAP_PRO
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_EAP_PRO
+        DB_USER: APP_ALERTAS_EAP_PRO
+        DB_PASSWORD: PENDIENTE_DB_PASSWORD_EAP_PRO
+- configFile: projects/controlador-de-estados-alerta-profesional.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_EAP_EVALUADOR_MSC_PRO
+    environment:
+      secrets:
+        DB_URL: PENDIENTE_DB_URL_EAP_PRO
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_EAP_PRO
+        DB_USER: APP_ALERTAS_EAP_PRO
+        DB_PASSWORD: PENDIENTE_DB_PASSWORD_EAP_PRO
+        ltpa_keys_password: PENDIENTE_LTPA_KEYS_PASSWORD_PRO
+- configFile: projects/gestor-snapshot-alertas-profesional.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_EAP_GENERARSNAPSHOT_MSC_PRO
+    environment:
+      secrets:
+        DB_URL: PENDIENTE_DB_URL_EAP_PRO
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_EAP_PRO
+        DB_USER: APP_ALERTAS_EAP_PRO
+        DB_PASSWORD: PENDIENTE_DB_PASSWORD_EAP_PRO
+- configFile: projects/gestor-estados-alerta-profesional-api.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_EAP_MANAGER_MSC_PRO
+    environment:
+      secrets:
+        DB_URL: PENDIENTE_DB_URL_EAP_PRO
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_EAP_PRO
+        DB_USER: APP_ALERTAS_EAP_PRO
+        DB_PASSWORD: PENDIENTE_DB_PASSWORD_EAP_PRO
+      configMap:
+        ALERT_EVALUATOR_UPSTREAM_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/evaluador
+        ALERT_PROJECTION_UPSTREAM_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/alertprojection
+        ALERT_SNAPSHOT_UPSTREAM_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/generarsnapshot
+- configFile: projects/compositor-evento-a-hecho-evaluable.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_CHA_GENHECHOEVALUABLEALERTA_MSC_PRO
+    environment:
+      secrets:
+        DB_URL: PENDIENTE_DB_URL_CHA_PRO
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_CHA_PRO
+        DB_USER: APP_ALERTAS_CHA_PRO
+        DB_PASSWORD: PENDIENTE_DB_PASSWORD_CHA_PRO
+      configMap:
+        RXXI_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/rxxi
+- configFile: projects/gestor-cdv-alertas.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_GEV_GESTORESTADOVERSIONADO_MSC_PRO
+    environment:
+      secrets:
+        DB_URL: PENDIENTE_DB_URL_GEV_PRO
+        DB_DEFAULT_SCHEMA: OWN_ALERTAS_GEV_PRO
+        DB_USER: APP_ALERTAS_GEV_PRO
+        DB_PASSWORD: PENDIENTE_DB_PASSWORD_GEV_PRO
+      configMap:
+        CCA_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/gestorcatalogoalertas
+- configFile: projects/motor-evaluador-hechos.yaml
+  spec:
+    type: microservicio
+    imageTag: PENDIENTE_TAG_ALERT_CAL_EVALUACIONHECHOALERTA_MSC_PRO
+    environment:
+      configMap:
+        CCA_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/gestorcatalogoalertas
+        GEV_BASE_URL: https://api-alertas-pro.sas.junta-andalucia.es/consultaalertas

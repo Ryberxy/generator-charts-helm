@@ -1,0 +1,9 @@
+{{- if and .Values.kafka .Values.kafka.security .Values.kafka.security.enabled }}
+  {{- if not .Values.kafka.security.caFilePath }}
+    {{- fail "VALIDATION ERROR: 'kafka.security.caFilePath' es OBLIGATORIO cuando 'kafka.security.enabled=true'. Se debe indicar la ruta COMPLETA donde se montará en el container el certificado" -}}
+  {{- end }}
+
+  {{- if and (not .Values.kafka.security.caSecretName) (not .Values.kafka.security.certData) }}
+    {{- fail "VALIDATION ERROR: Debes definir 'kafka.security.caSecretName' (Secret existente) o 'kafka.security.certData' (PEM inline) cuando 'kafka.security.enabled=true'." -}}
+  {{- end }}
+{{- end }}

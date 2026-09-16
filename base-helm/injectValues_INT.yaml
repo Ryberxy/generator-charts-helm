@@ -1,0 +1,28 @@
+global:
+  nameSpace: ""
+  registry:
+    dns: ""
+    path: ""
+  ingress:
+    gateway: ""
+    name: ""
+
+microservicio:
+  spec:
+    ingress:
+      host: ""
+      gateway: ""
+
+front:
+  spec:
+    ingress:
+      host: ""
+      gateway: ""
+
+api:
+  spec:
+    ingress:
+      host: ""
+      gateway: ""
+
+projects: []

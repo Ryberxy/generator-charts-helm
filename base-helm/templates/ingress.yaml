@@ -1,0 +1,69 @@
+{{- $global := .Values.global | default dict -}}
+{{- $platformIngress := $global.ingress | default dict -}}
+{{- $ingress := .Values.ingress | default dict -}}
+
+{{- $ingressClassName := $global.ingressClassName | default "" -}}
+{{- $annotations := $ingress.annotations | default dict -}}
+{{- $tls := $ingress.tls | default dict -}}
+
+{{- $ingressEnabled := true -}}
+{{- if hasKey $platformIngress "enabled" -}}
+  {{- $ingressEnabled = $platformIngress.enabled -}}
+{{- end -}}
+
+{{- $ingressNamespace := "istio-system" -}}
+{{- if $platformIngress.namespace -}}
+  {{- $ingressNamespace = $platformIngress.namespace -}}
+{{- end -}}
+
+{{- $hostsYaml := include "generic.ingressHosts" . | trim -}}
+
+{{- if and $hostsYaml $ingressEnabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "generic.sharedIngressName" . }}
+  namespace: {{ $ingressNamespace }}
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+    {{- if $ingressClassName }}
+    kubernetes.io/ingress.class: {{ $ingressClassName | quote }}
+    {{- end }}
+    {{- range $key, $value := $annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+
+spec:
+  {{- if $ingressClassName }}
+  ingressClassName: {{ $ingressClassName | quote }}
+  {{- end }}
+
+  {{- if $tls.enabled }}
+  tls:
+    {{- range $entry := ($tls.entries | default list) }}
+    - hosts:
+        {{- range $host := ($entry.hosts | default list) }}
+        - {{ $host | quote }}
+        {{- end }}
+      secretName: {{ $entry.secretName | quote }}
+    {{- end }}
+  {{- end }}
+
+  rules:
+    {{- range $host := (fromYamlArray (printf "%s\n" $hostsYaml)) }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: istio-ingressgateway
+                port:
+                  number: 80
+    {{- end }}
+{{- end }}
