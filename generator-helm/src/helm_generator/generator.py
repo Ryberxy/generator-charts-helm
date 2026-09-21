@@ -44,6 +44,42 @@ def get_front_runtime_config_name(
     return f"{component.name}-front-runtime-config"
 
 
+ENVIRONMENT_INTEGRATION = "integration"
+ENVIRONMENT_CERTIFICATION = "certification"
+
+
+def get_front_host(
+    config: ProjectConfiguration,
+    environment: str,
+) -> str:
+    """
+    Host compartido por todos los componentes de tipo "front" en un
+    entorno. Cada front añade su propio prefijo de ruta (ver
+    ComponentConfiguration.application_context_path) para convivir
+    en el mismo host, ej.: front-pdu-integration.<dns>/portal-cliente
+    """
+    return (
+        f"front-{config.application_name}-{environment}"
+        f".{config.dns_suffix}"
+    )
+
+
+def get_backend_host(
+    config: ProjectConfiguration,
+    environment: str,
+) -> str:
+    """
+    Host compartido por los componentes de tipo "api" y
+    "microservicio" en un entorno, siguiendo la misma convención que
+    ya usa el proyecto de alertas en producción: un único host por
+    entorno donde cada componente añade su propio prefijo de ruta.
+    """
+    return (
+        f"api-{config.application_name}-{environment}"
+        f".{config.dns_suffix}"
+    )
+
+
 def build_chart_metadata(
     config: ProjectConfiguration,
 ) -> dict:
@@ -185,11 +221,19 @@ def build_environment_values(
     config: ProjectConfiguration,
     namespace: str,
     registry_dns: str,
-    ingress_host: str,
+    environment: str,
 ) -> dict:
-    type_spec = build_default_type_spec(
+    front_spec = build_default_type_spec(
         config=config,
-        ingress_host=ingress_host,
+        ingress_host=get_front_host(config, environment),
+    )
+
+    # api y microservicio comparten host (y por tanto el mismo dict:
+    # así, al volcar a YAML, PyYAML emite un anchor/alias entre
+    # ambos, igual que hacía la plantilla original).
+    backend_spec = build_default_type_spec(
+        config=config,
+        ingress_host=get_backend_host(config, environment),
     )
 
     projects = []
@@ -234,13 +278,13 @@ def build_environment_values(
             },
         },
         "front": {
-            "spec": type_spec,
+            "spec": front_spec,
         },
         "api": {
-            "spec": type_spec,
+            "spec": backend_spec,
         },
         "microservicio": {
-            "spec": type_spec,
+            "spec": backend_spec,
         },
         "projects": projects,
     }
@@ -254,14 +298,14 @@ def write_environment_values(
         config=config,
         namespace=get_integration_namespace(config),
         registry_dns="azudirayacont02.azurecr.io",
-        ingress_host=config.integration_host,
+        environment=ENVIRONMENT_INTEGRATION,
     )
 
     cer_values = build_environment_values(
         config=config,
         namespace=get_certification_namespace(config),
         registry_dns="10.200.201.109:8083",
-        ingress_host=config.certification_host,
+        environment=ENVIRONMENT_CERTIFICATION,
     )
 
     int_file = chart_directory / "injectValues_INT.yaml"

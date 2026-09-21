@@ -71,18 +71,12 @@ def validate_configuration(
             "metrics_path debe comenzar por '/'."
         )
 
-    if config.ingress_enabled:
-        if not config.integration_host:
-            errors.append(
-                "integration_host es obligatorio cuando "
-                "ingress_enabled=true."
-            )
-
-        if not config.certification_host:
-            errors.append(
-                "certification_host es obligatorio cuando "
-                "ingress_enabled=true."
-            )
+    if config.ingress_enabled and not config.dns_suffix:
+        errors.append(
+            "dns_suffix es obligatorio cuando ingress_enabled=true. "
+            "Se usa para construir los hosts front-<project>-<env> "
+            "y api-<project>-<env>."
+        )
 
     component_names: set[str] = set()
 

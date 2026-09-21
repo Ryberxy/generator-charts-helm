@@ -20,8 +20,7 @@ class ProjectConfiguration:
     application_version: str
     chart_version: str
     registry_path: str
-    integration_host: str
-    certification_host: str
+    dns_suffix: str
     replica_count: int
     usage_level: str
     sas_monitoring_enabled: bool

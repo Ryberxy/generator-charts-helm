@@ -114,15 +114,15 @@ def add_project_arguments(parser: argparse.ArgumentParser) -> None:
     )
 
     parser.add_argument(
-        "--integration-host",
+        "--dns-suffix",
         required=True,
-        help="Host público del entorno INT.",
-    )
-
-    parser.add_argument(
-        "--certification-host",
-        required=True,
-        help="Host público del entorno CER.",
+        help=(
+            "Sufijo DNS base para construir los hosts de INT y CER. "
+            "Ejemplo: 10.200.201.76.nip.io. A partir de él se "
+            "generan automáticamente front-<project>-integration."
+            "<sufijo>, api-<project>-integration.<sufijo> y sus "
+            "equivalentes -certification."
+        ),
     )
 
     parser.add_argument(
@@ -219,8 +219,7 @@ def build_configuration(
         application_version=arguments.application_version.strip(),
         chart_version=arguments.chart_version.strip(),
         registry_path=registry_path,
-        integration_host=arguments.integration_host.strip(),
-        certification_host=arguments.certification_host.strip(),
+        dns_suffix=arguments.dns_suffix.strip(),
         replica_count=arguments.replica_count,
         usage_level=arguments.usage_level.strip(),
         sas_monitoring_enabled=arguments.sas_monitoring_enabled,
